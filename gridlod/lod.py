@@ -470,6 +470,7 @@ def computeCoarseQuantities(patch, lambdasList, correctorsList, aPatch):
             
         # Solve eigenvalue problem LTPrimeij x = mu_TPrime Mij x
         eigenvalues = scipy.linalg.eigvals(LTPrimeij[TPrimeInd][cutRows:,cutRows:], Kij[cutRows:,cutRows:])
+        eigenvalues[eigenvalues >= 1E308] = 0    #remove infinity
         muTPrime[TPrimeInd] = np.max(np.real(eigenvalues))
 
     return CoarseScaleInformation(Kij, Kmsij, muTPrime)
