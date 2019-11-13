@@ -6,8 +6,7 @@ from . import util
 from . import fem
 from . import linalg
 
-def solveFine(world, aFine, MbFine, AbFine, boundaryConditions):
-    NWorldCoarse = world.NWorldCoarse
+def solveFine(world, aFine, MbFine, AbFine, boundaryConditions, return_fine=False):
     NWorldFine = world.NWorldCoarse*world.NCoarseElement
     NpFine = np.prod(NWorldFine+1)
     
@@ -39,7 +38,10 @@ def solveFine(world, aFine, MbFine, AbFine, boundaryConditions):
     uFineFull[freeFine] = uFineFree
     uFineFull = uFineFull
 
+    if return_fine:
+        return uFineFull, AFine, MFine, freeFine
     return uFineFull, AFine, MFine
+
 
 def solveCoarse(world, aFine, MbFine, AbFine, boundaryConditions):
     NWorldCoarse = world.NWorldCoarse
