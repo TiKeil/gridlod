@@ -27,6 +27,7 @@ def solveFine(world, aFine, MbFine, AbFine, boundaryConditions, return_fine=Fals
 
     AFine = fem.assemblePatchMatrix(NWorldFine, ALocFine, aFine)
     MFine = fem.assemblePatchMatrix(NWorldFine, world.MLocFine)
+    H1Fine = fem.assemblePatchMatrix(NWorldFine, world.ALocFine)
     
     bFine = MFine*MbFine + AFine*AbFine
     
@@ -39,7 +40,7 @@ def solveFine(world, aFine, MbFine, AbFine, boundaryConditions, return_fine=Fals
     uFineFull = uFineFull
 
     if return_fine:
-        return uFineFull, AFine, MFine, freeFine
+        return uFineFull, AFine, MFine, H1Fine, freeFine
     return uFineFull, AFine, MFine
 
 
