@@ -623,7 +623,48 @@ def computeSeparatedBasisCoarseQuantities(patch, correctorsList, aPatch):
 
     performTPrimeLoop(patch, lambdasList, correctorsList, aPatch, accumulate)
 
-    muTPrime = np.zeros(NTPrime)
+    cutRows = 0
+    while np.linalg.cond(Kij[cutRows:, cutRows:]) > 1e8:
+        cutRows = cutRows + 1
+
+    return SeparatedCoarseScaleInformation(Kij, Kmsij, Qmsij)
+
+def computeSingleSeparatedBasisCoarseQuantities(patch, corrector, aPatch):
+    ''' Compute the coarse quantities for the basis and its correctors
+
+    Compute the tensors (T is implcit by the patch definition) and
+    return them in a CoarseScaleInformation object:
+
+       KTij   = (A \nabla lambda_j, \nabla lambda_i)_{T}
+       KmsTij = (A \nabla (lambda_j - corrector_j), \nabla lambda_i)_{U_k(T)}
+       QmsTij = - (A \nabla corrector_j, \nabla lambda_i)_{U_k(T)}
+
+    See notes/coarse_quantities*.pdf for a description.
+    '''
+
+    lambdasList = list(patch.world.localBasis.T)
+
+    NPatchCoarse = patch.NPatchCoarse
+    NTPrime = np.prod(NPatchCoarse)
+    NpPatchCoarse = np.prod(NPatchCoarse + 1)
+    numLambdas = len(lambdasList)
+
+    TInd = util.convertpCoordIndexToLinearIndex(patch.NPatchCoarse - 1, patch.iElementPatchCoarse)
+
+    Kmsij = np.zeros((NpPatchCoarse, numLambdas))
+    Qmsij = np.zeros((NpPatchCoarse, 1))
+    Kij = np.zeros((numLambdas, numLambdas))
+
+    def accumulate(TPrimeInd, TPrimei, P, Q, KTPrime, BTPrimeij, CTPrimeij):
+        if TPrimeInd == TInd:
+            Kij[:] = np.dot(P.T, KTPrime * P)
+            Kmsij[TPrimei, :] += Kij
+            Qmsij[TPrimei, :] += -BTPrimeij
+        else:
+            Qmsij[TPrimei, :] += -BTPrimeij
+
+    performTPrimeLoop(patch, lambdasList, corrector, aPatch, accumulate)
+
     cutRows = 0
     while np.linalg.cond(Kij[cutRows:, cutRows:]) > 1e8:
         cutRows = cutRows + 1
