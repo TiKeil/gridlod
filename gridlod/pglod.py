@@ -129,7 +129,6 @@ def assembleStiffnessMatrix(world, KijT):
     coarse element.
 
     '''
-    world = self.world
     NWorldCoarse = world.NWorldCoarse
 
     NtCoarse = np.prod(world.NWorldCoarse)
@@ -143,8 +142,6 @@ def assembleStiffnessMatrix(world, KijT):
     data = []
     for TInd in range(NtCoarse):
         Kij = KijT[TInd]
-
-        NPatchCoarse = ecT.NPatchCoarse
 
         colsT = TpStartIndices[TInd] + TpIndexMap
         rowsT = TpStartIndices[TInd] + TpIndexMap
